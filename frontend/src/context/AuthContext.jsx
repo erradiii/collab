@@ -12,7 +12,10 @@ export function AuthProvider({ children }) {
     if (token) {
       client.get('/users/me/')
         .then(res => setUser(res.data))
-        .catch(() => localStorage.removeItem('access_token'))
+        .catch(() => {
+          localStorage.removeItem('access_token')
+          localStorage.removeItem('refresh_token')
+        })
         .finally(() => setLoading(false))
     } else {
       setLoading(false)
@@ -22,12 +25,14 @@ export function AuthProvider({ children }) {
   const login = async (email, password) => {
     const res = await client.post('/auth/login/', { email, password })
     localStorage.setItem('access_token', res.data.access)
+    localStorage.setItem('refresh_token', res.data.refresh)
     const me = await client.get('/users/me/')
     setUser(me.data)
   }
 
   const logout = () => {
     localStorage.removeItem('access_token')
+    localStorage.removeItem('refresh_token')
     setUser(null)
   }
 
